@@ -30,7 +30,7 @@ namespace Client
 
             using HttpClient client = new HttpClient();
 
-            // 1. Neue Ferienwohnung hinzufügen
+            
             var feWo = new FeWo { Name = "WohnungX", Ort = "Ankara", PreisProWoche = 1234 };
             var createResponse = await client.PostAsJsonAsync($"{baseUrl}/FeWo", feWo);
             if (!createResponse.IsSuccessStatusCode)

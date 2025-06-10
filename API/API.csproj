@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\Users\YAVUZ\source\repos\FeWoApp\API\obj\Debug\net8.0\API.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
