@@ -11,13 +11,13 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class BuchungController : ControllerBase
     {
-        private readonly BuchungService _buchungService;
+        private readonly IService<Buchung> _buchungService;
 
         /// <summary>
         /// Erstellt eine neue Instanz des BuchungControllers.
         /// </summary>
-        /// <param name="buchungService">Service für Buchungs-Operationen</param>
-        public BuchungController(BuchungService buchungService)
+        /// <param name="buchungService"></param>
+        public BuchungController(IService<Buchung> buchungService)
         {
             _buchungService = buchungService;
         }

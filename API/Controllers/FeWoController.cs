@@ -12,13 +12,13 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class FeWoController : ControllerBase
     {
-        private readonly FeWoService _feWoService;
+        private readonly IService<FeWo> _feWoService;
 
         /// <summary>
         /// Erstellt eine neue Instanz des FeWoControllers.
         /// </summary>
         /// <param name="feWoService">Service für FeWo-Operationen</param>
-        public FeWoController(FeWoService feWoService)
+        public FeWoController(IService<FeWo> feWoService)
         {
             _feWoService = feWoService;
         }
