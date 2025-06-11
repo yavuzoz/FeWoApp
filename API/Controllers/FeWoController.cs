@@ -14,10 +14,6 @@ namespace API.Controllers
     {
         private readonly IService<FeWo> _feWoService;
 
-        /// <summary>
-        /// Erstellt eine neue Instanz des FeWoControllers.
-        /// </summary>
-        /// <param name="feWoService">Service für FeWo-Operationen</param>
         public FeWoController(IService<FeWo> feWoService)
         {
             _feWoService = feWoService;
@@ -26,43 +22,68 @@ namespace API.Controllers
         /// <summary>
         /// Gibt eine Liste aller Ferienwohnungen zurück.
         /// </summary>
-        /// <returns>Liste von FeWo-Objekten</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(List<FeWo>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public ActionResult<List<FeWo>> GetAll()
         {
-            return Ok(_feWoService.LesenAlle());
+            try
+            {
+                return Ok(_feWoService.LesenAlle());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Gibt eine Liste aller aktiven Ferienwohnungen zurück.
         /// </summary>
-        /// <returns>Liste von aktiven FeWo-Objekten</returns>
         [HttpGet("active")]
+        [ProducesResponseType(typeof(List<FeWo>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public ActionResult<List<FeWo>> GetAllActive()
         {
-            return Ok(_feWoService.LesenAlleAktive());
+            try
+            {
+                return Ok(_feWoService.LesenAlleAktive());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Gibt eine einzelne Ferienwohnung anhand ihrer Id zurück.
         /// </summary>
-        /// <param name="id">Id der gesuchten Ferienwohnung</param>
-        /// <returns>FeWo-Objekt oder NotFound</returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(FeWo), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public ActionResult<FeWo> Get(long id)
         {
-            var feWo = _feWoService.LesenEinzeln(id);
-            if (feWo == null)
-                return NotFound(new { Message = $"FeWo mit Id {id} wurde nicht gefunden." });
-            return feWo;
+            try
+            {
+                var feWo = _feWoService.LesenEinzeln(id);
+                if (feWo == null)
+                    return NotFound(new { Message = $"FeWo mit Id {id} wurde nicht gefunden." });
+                return Ok(feWo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Erstellt eine neue Ferienwohnung.
         /// </summary>
-        /// <param name="feWo">Das zu erstellende FeWo-Objekt</param>
-        /// <returns>Id der erstellten Ferienwohnung</returns>
         [HttpPost]
+        [ProducesResponseType(typeof(long), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public ActionResult<long> Create([FromBody] FeWo feWo)
         {
             try
@@ -81,33 +102,49 @@ namespace API.Controllers
         /// <summary>
         /// Aktualisiert eine bestehende Ferienwohnung.
         /// </summary>
-        /// <param name="id">Id der zu aktualisierenden FeWo</param>
-        /// <param name="feWo">Neue Daten der FeWo</param>
-        /// <returns>NoContent oder Fehlernachricht</returns>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public IActionResult Update(long id, [FromBody] FeWo feWo)
         {
-            if (id != feWo.Id)
-                return BadRequest(new { Message = "Id stimmt nicht überein." });
+            try
+            {
+                if (id != feWo.Id)
+                    return BadRequest(new { Message = "Id stimmt nicht überein." });
 
-            var updated = _feWoService.Aktualisieren(feWo);
-            if (!updated)
-                return NotFound(new { Message = $"FeWo mit Id {id} nicht gefunden oder Update fehlgeschlagen." });
-            return NoContent();
+                var updated = _feWoService.Aktualisieren(feWo);
+                if (!updated)
+                    return NotFound(new { Message = $"FeWo mit Id {id} nicht gefunden oder Update fehlgeschlagen." });
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Setzt eine Ferienwohnung auf inaktiv (Soft Delete).
         /// </summary>
-        /// <param name="id">Id der zu deaktivierenden FeWo</param>
-        /// <returns>NoContent oder Fehlernachricht</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status500InternalServerError)]
         public IActionResult Deactivate(long id)
         {
-            var success = _feWoService.Deaktivieren(id);
-            if (!success)
-                return NotFound(new { Message = $"FeWo mit Id {id} nicht gefunden oder bereits inaktiv." });
-            return NoContent();
+            try
+            {
+                var success = _feWoService.Deaktivieren(id);
+                if (!success)
+                    return NotFound(new { Message = $"FeWo mit Id {id} nicht gefunden oder bereits inaktiv." });
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
     }
 }

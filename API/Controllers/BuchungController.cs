@@ -13,10 +13,6 @@ namespace API.Controllers
     {
         private readonly IService<Buchung> _buchungService;
 
-        /// <summary>
-        /// Erstellt eine neue Instanz des BuchungControllers.
-        /// </summary>
-        /// <param name="buchungService"></param>
         public BuchungController(IService<Buchung> buchungService)
         {
             _buchungService = buchungService;
@@ -25,43 +21,68 @@ namespace API.Controllers
         /// <summary>
         /// Gibt eine Liste aller Buchungen zurück.
         /// </summary>
-        /// <returns>Liste von Buchung-Objekten</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(List<Buchung>), 200)]
+        [ProducesResponseType(typeof(object), 500)]
         public ActionResult<List<Buchung>> GetAll()
         {
-            return Ok(_buchungService.LesenAlle());
+            try
+            {
+                return Ok(_buchungService.LesenAlle());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Gibt eine Liste aller aktiven Buchungen zurück.
         /// </summary>
-        /// <returns>Liste von aktiven Buchungen</returns>
         [HttpGet("active")]
+        [ProducesResponseType(typeof(List<Buchung>), 200)]
+        [ProducesResponseType(typeof(object), 500)]
         public ActionResult<List<Buchung>> GetAllActive()
         {
-            return Ok(_buchungService.LesenAlleAktive());
+            try
+            {
+                return Ok(_buchungService.LesenAlleAktive());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Gibt eine einzelne Buchung anhand ihrer Id zurück.
         /// </summary>
-        /// <param name="id">Id der gesuchten Buchung</param>
-        /// <returns>Buchung-Objekt oder NotFound</returns>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Buchung), 200)]
+        [ProducesResponseType(typeof(object), 404)]
+        [ProducesResponseType(typeof(object), 500)]
         public ActionResult<Buchung> Get(long id)
         {
-            var buchung = _buchungService.LesenEinzeln(id);
-            if (buchung == null)
-                return NotFound(new { Message = $"Buchung mit Id {id} wurde nicht gefunden." });
-            return buchung;
+            try
+            {
+                var buchung = _buchungService.LesenEinzeln(id);
+                if (buchung == null)
+                    return NotFound(new { Message = $"Buchung mit Id {id} wurde nicht gefunden." });
+                return Ok(buchung);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Erstellt eine neue Buchung.
         /// </summary>
-        /// <param name="buchung">Das zu erstellende Buchung-Objekt</param>
-        /// <returns>Id der erstellten Buchung</returns>
         [HttpPost]
+        [ProducesResponseType(typeof(long), 201)]
+        [ProducesResponseType(typeof(object), 400)]
+        [ProducesResponseType(typeof(object), 500)]
         public ActionResult<long> Create([FromBody] Buchung buchung)
         {
             try
@@ -80,33 +101,48 @@ namespace API.Controllers
         /// <summary>
         /// Aktualisiert eine bestehende Buchung.
         /// </summary>
-        /// <param name="id">Id der zu aktualisierenden Buchung</param>
-        /// <param name="buchung">Neue Daten der Buchung</param>
-        /// <returns>NoContent oder Fehlernachricht</returns>
         [HttpPut("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(object), 400)]
+        [ProducesResponseType(typeof(object), 500)]
         public IActionResult Update(long id, [FromBody] Buchung buchung)
         {
-            if (id != buchung.Id)
-                return BadRequest(new { Message = "Id stimmt nicht überein." });
+            try
+            {
+                if (id != buchung.Id)
+                    return BadRequest(new { Message = "Id stimmt nicht überein." });
 
-            var updated = _buchungService.Aktualisieren(buchung);
-            if (!updated)
-                return BadRequest(new { Message = "Aktualisierung fehlgeschlagen, möglicherweise wegen Kollision oder nicht gefunden." });
-            return NoContent();
+                var updated = _buchungService.Aktualisieren(buchung);
+                if (!updated)
+                    return BadRequest(new { Message = "Aktualisierung fehlgeschlagen, möglicherweise wegen Kollision oder nicht gefunden." });
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         /// <summary>
         /// Setzt eine Buchung auf inaktiv (Soft Delete).
         /// </summary>
-        /// <param name="id">Id der zu deaktivierenden Buchung</param>
-        /// <returns>NoContent oder Fehlernachricht</returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(object), 404)]
+        [ProducesResponseType(typeof(object), 500)]
         public IActionResult Deactivate(long id)
         {
-            var success = _buchungService.Deaktivieren(id);
-            if (!success)
-                return NotFound(new { Message = $"Buchung mit Id {id} nicht gefunden oder bereits inaktiv." });
-            return NoContent();
+            try
+            {
+                var success = _buchungService.Deaktivieren(id);
+                if (!success)
+                    return NotFound(new { Message = $"Buchung mit Id {id} nicht gefunden oder bereits inaktiv." });
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
     }
 }
